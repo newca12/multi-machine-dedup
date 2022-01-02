@@ -155,8 +155,8 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
 
     for file in file_iter {
         let stored_hash: u32 = file.as_ref().unwrap().hash;
-        let path = file.unwrap().full_path;
-        if stored_hash != hash(&PathBuf::from(path.clone())) {
+        let path = &file.as_ref().unwrap().full_path;
+        if stored_hash != hash(&PathBuf::from(path)) {
             println!("check failed on file: '{}'", path);
         }
     }
