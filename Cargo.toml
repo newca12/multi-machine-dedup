@@ -5,8 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+clap = { version = "3.0.14", features = ["derive"] }
 crc = "2.1.0"
 rusqlite = { version = "0.26.3", features = ["bundled"] }
-structopt = "0.3.25"
-tree_magic_mini = { version = "3.0.2", features = ["with-gpl-data"] }
+tree_magic_mini = { version = "3.0.3", features = ["with-gpl-data"] }
 walkdir = "2.3.2"

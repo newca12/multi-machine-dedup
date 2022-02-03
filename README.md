@@ -12,12 +12,12 @@ The purpose of [edla.org](http://www.edla.org) is to promote the state of the ar
 
 Index a directory
 ```
- cargo run -- index -h HOST_LABEL --db SQLITE_FILE DIRECTORY_FULL_PATH
+ cargo run -- index -l LABEL --db SQLITE_FILE DIRECTORY_FULL_PATH
 ```
 
 Check a directory
 ```
- cargo run -- check-integrity -h HOST_LABEL --db SQLITE_FILE
+ cargo run -- check-integrity -l LABEL --db SQLITE_FILE
 ```
 
 ## Example of SQL queries ##

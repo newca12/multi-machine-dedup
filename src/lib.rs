@@ -1,19 +1,19 @@
+use clap::Parser;
 use crc::{Crc, CRC_32_ISCSI};
 use rusqlite::{params, Connection, Error};
 use std::fs::{self, File};
 use std::io::{BufReader, Read};
 use std::path::{Path, PathBuf};
-use structopt::StructOpt;
 use walkdir::WalkDir;
 
-#[derive(StructOpt, Debug)]
-#[structopt(name = "multi-machine-dedup")]
+#[derive(Parser, Debug)]
+#[clap(name = "multi-machine-dedup")]
 pub struct CLI {
-    #[structopt(subcommand)]
+    #[clap(subcommand)]
     pub cmd: SubCommand,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 pub enum SubCommand {
     #[structopt(name = "index", about = "Use index to create or update a database")]
     Index(IndexOptions),
@@ -24,20 +24,20 @@ pub enum SubCommand {
     CheckIntegrity(CheckIntegrityOptions),
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 pub struct IndexOptions {
     #[structopt(short, long)]
-    pub host: String,
+    pub label: String,
     #[structopt(short, long, parse(from_os_str))]
     pub db: PathBuf,
     pub path: PathBuf,
 }
 
-#[derive(StructOpt, Debug)]
+#[derive(Parser, Debug)]
 pub struct CheckIntegrityOptions {
-    #[structopt(short, long)]
-    pub host: String,
-    #[structopt(short, long, parse(from_os_str))]
+    #[clap(short, long)]
+    pub label: String,
+    #[clap(short, long, parse(from_os_str))]
     pub db: PathBuf,
 }
 
@@ -122,7 +122,7 @@ pub fn index(opt: IndexOptions) {
             }
             let res = conn.execute(
                 "INSERT INTO file (host, full_path, hash, size) VALUES (?1, ?2, ?3, ?4)",
-                params![opt.host, data.full_path, data.hash, data.size],
+                params![opt.label, data.full_path, data.hash, data.size],
             ); //.expect("req2");
             match res {
                 Ok(_) => (),
@@ -143,7 +143,7 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
     let conn = Connection::open(opt.db).unwrap();
     let mut stmt = conn.prepare("SELECT * FROM file WHERE host=:host").unwrap();
     let file_iter = stmt
-        .query_map(&[(":host", &opt.host)], |row| {
+        .query_map(&[(":host", &opt.label)], |row| {
             Ok(Entry {
                 hash: row.get(2)?,
                 full_path: row.get(1)?,
@@ -155,7 +155,7 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
 
     for file in file_iter {
         let stored_hash: u32 = file.as_ref().unwrap().hash;
-        let path = &file.as_ref().unwrap().full_path;
+        let path = &file.unwrap().full_path; //diff with &file.as_ref().unwrap() ??
         if stored_hash != hash(&PathBuf::from(path)) {
             println!("check failed on file: '{}'", path);
         }
