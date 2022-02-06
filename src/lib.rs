@@ -23,6 +23,8 @@ pub enum SubCommand {
         about = "Use check-integrity to verify all files"
     )]
     CheckIntegrity(CheckIntegrityOptions),
+    #[structopt(name = "compare", about = "Use compare to compare two databases")]
+    Compare(CompareOptions),
 }
 
 #[derive(Parser, Debug)]
@@ -40,6 +42,14 @@ pub struct CheckIntegrityOptions {
     pub label: String,
     #[clap(short, long, parse(from_os_str))]
     pub db: PathBuf,
+}
+
+#[derive(Parser, Debug)]
+pub struct CompareOptions {
+    #[clap(long, parse(from_os_str))]
+    pub db1: PathBuf,
+    #[clap(long, parse(from_os_str))]
+    pub db2: PathBuf,
 }
 
 #[derive(Clone, Debug)]
@@ -163,6 +173,50 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
             debug!("check ok on file: '{}'", path);
         }
     }
+}
+
+pub fn compare(opt: CompareOptions) {
+    let conn1 = Connection::open(opt.db1).unwrap();
+    let mut stmt1 = conn1.prepare("SELECT * FROM hash").unwrap();
+    let conn2 = Connection::open(opt.db2).unwrap();
+    let mut stmt2 = conn2.prepare("SELECT * FROM hash").unwrap();
+    let file_iter1 = stmt1
+        .query_map([], |row| {
+            Ok(Entry {
+                hash: row.get(0)?,
+                full_path: "".to_string(),
+                size: row.get(1)?,
+                mime: "".to_string(),
+            })
+        })
+        .unwrap();
+    let mut count = 0;
+    let mut entries = 0;
+    for file1 in file_iter1 {
+        entries = entries + 1;
+        let mut file_iter2 = stmt2
+            .query_map([], |row| {
+                Ok(Entry {
+                    hash: row.get(0)?,
+                    full_path: "".to_string(),
+                    size: row.get(1)?,
+                    mime: "".to_string(),
+                })
+            })
+            .unwrap();
+        let stored_hash1: u32 = file1.as_ref().unwrap().hash;
+        let f = file_iter2.find(|h| h.as_ref().unwrap().hash == stored_hash1);
+        if f.is_none() {
+            warn!("hash {} not found in db2", stored_hash1);
+            count = count + 1;
+        }
+    }
+
+    if count == 0 {
+        info!("All {} entries in db1 are also in db2", entries);
+    } else {
+        warn!("Missing {} entries", count);
+    };
 }
 
 fn get_file_content(path: &Path) -> Vec<u8> {

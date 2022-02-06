@@ -10,14 +10,19 @@ The purpose of [edla.org](http://www.edla.org) is to promote the state of the ar
 
 ## How to use it ##
 
-Index a directory
+Index recursively a directory <DIRECTORY_FULL_PATH> labelled with a \<LABEL> in a SQLite database <SQLITE_FILE>
 ```
- cargo run -- index -l LABEL --db SQLITE_FILE DIRECTORY_FULL_PATH
+ cargo run -- index -l <LABEL> --db <SQLITE_FILE> <DIRECTORY_FULL_PATH>
 ```
 
 Check a directory
 ```
- cargo run -- check-integrity -l LABEL --db SQLITE_FILE
+ cargo run -- check-integrity -l <LABEL> --db <SQLITE_FILE>
+```
+
+Compare two databases
+```
+ cargo run -- compare --db1 <SQLITE_FILE_1> --db2 <SQLITE_FILE_2>
 ```
 
 ## Example of SQL queries ##
@@ -43,10 +48,10 @@ select * from hash where mime like "image/jpeg" ;
 
 Enable debug mode in PowerShell
 ```
-$Env:RUST_LOG='info';  cargo run ...
+$Env:RUST_LOG='debug';  cargo run ...
 ```
 
-Show help of a <SUBCOMMAND>
+Show help of a \<SUBCOMMAND>
 ```
 cargo run -- <SUBCOMMAND> --help
 ```
