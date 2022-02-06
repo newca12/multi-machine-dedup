@@ -1,5 +1,6 @@
 use clap::Parser;
 use crc::{Crc, CRC_32_ISCSI};
+use log::{debug, error, info, warn};
 use rusqlite::{params, Connection, Error};
 use std::fs::{self, File};
 use std::io::{BufReader, Read};
@@ -85,12 +86,12 @@ pub fn index(opt: IndexOptions) {
     for entry in WalkDir::new(opt.path) {
         let entry = entry.unwrap();
         if entry.file_type().is_dir() {
-            println!("Processsing directory {}", entry.path().display());
+            info!("Processsing directory {}", entry.path().display());
         } else {
             let x = fs::metadata(entry.path()).unwrap().len();
-            println!("file {} {:?}", entry.path().display(), x);
+            info!("Indexing file {} {:?}", entry.path().display(), x);
             let crc = hash(entry.path());
-            println!("The crc is: {} for file {}", crc, entry.path().display());
+            debug!("The crc is: {} for file {}", crc, entry.path().display());
             let data = Entry {
                 hash: crc,
                 full_path: entry.path().display().to_string(),
@@ -108,7 +109,7 @@ pub fn index(opt: IndexOptions) {
                 Err(error) => match error {
                     Error::SqliteFailure(error, _msg) => {
                         if error.extended_code == 1555 {
-                            println!(
+                            warn!(
                                 "hash & size '{}' '{}' already indexed",
                                 data.hash, data.size
                             )
@@ -129,7 +130,7 @@ pub fn index(opt: IndexOptions) {
                 Err(error) => match error {
                     Error::SqliteFailure(error, _msg) => {
                         if error.extended_code == 1555 {
-                            println!("path '{}' already indexed", data.full_path)
+                            error!("path '{}' already indexed", data.full_path)
                         }
                     }
                     _ => panic!("Unable to index file: '{}' {}", data.full_path, error),
@@ -157,7 +158,9 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
         let stored_hash: u32 = file.as_ref().unwrap().hash;
         let path = &file.unwrap().full_path; //diff with &file.as_ref().unwrap() ??
         if stored_hash != hash(&PathBuf::from(path)) {
-            println!("check failed on file: '{}'", path);
+            error!("check failed on file: '{}'", path);
+        } else {
+            debug!("check ok on file: '{}'", path);
         }
     }
 }

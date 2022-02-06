@@ -22,21 +22,33 @@ Check a directory
 
 ## Example of SQL queries ##
 
-You can use a convenient database tool like [DBeaver CE](https://dbeaver.io/) to query the generated SQLite database.
+You can use a convenient database tool like [DBeaver CE](https://dbeaver.io) or [SQLiteStudio](https://sqlitestudio.pl) to query the generated SQLite database.
 
-Find top duplicates files larger than A_SIZE
+Find top duplicates files larger than <A_SIZE>
 ```
-select *, count(*) as nb_dup from file where size > A_SIZE group by hash order by nb_dup DESC, size DESC ;
+select *, count(*) as nb_dup from file where size > <A_SIZE> group by hash order by nb_dup DESC, size DESC ;
 ```
 
-Find all files with the same CRC_VALUE
+Find all files with the same <CRC_VALUE>
 ```
-select * from file where hash='A_CRC_VALUE' ;
+select * from file where hash=<A_CRC_VALUE> ;
 ```
 
 Find all files with image/jpeg MIME-type.
 ```
 select * from hash where mime like "image/jpeg" ;
+```
+
+## Tips ##
+
+Enable debug mode in PowerShell
+```
+$Env:RUST_LOG='info';  cargo run ...
+```
+
+Show help of a <SUBCOMMAND>
+```
+cargo run -- <SUBCOMMAND> --help
 ```
 
 ## Roadmap ##
