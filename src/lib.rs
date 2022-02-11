@@ -164,14 +164,23 @@ pub fn check_integrity(opt: CheckIntegrityOptions) {
         })
         .unwrap();
 
+    let mut ok_count = 0;
+    let mut ko_count = 0;
     for file in file_iter {
         let stored_hash: u32 = file.as_ref().unwrap().hash;
         let path = &file.unwrap().full_path; //diff with &file.as_ref().unwrap() ??
         if stored_hash != hash(&PathBuf::from(path)) {
+            ko_count += 1;
             error!("check failed on file: '{}'", path);
         } else {
+            ok_count += 1;
             debug!("check ok on file: '{}'", path);
         }
+    }
+    if ko_count == 0 {
+        info!("Integrity check OK, all {} files verified", ok_count);
+    } else {
+        error!("Integrity check failed, {} files are corrupted", ko_count);
     }
 }
 
@@ -193,7 +202,7 @@ pub fn compare(opt: CompareOptions) {
     let mut count = 0;
     let mut entries = 0;
     for file1 in file_iter1 {
-        entries = entries + 1;
+        entries += 1;
         let mut file_iter2 = stmt2
             .query_map([], |row| {
                 Ok(Entry {
@@ -208,14 +217,14 @@ pub fn compare(opt: CompareOptions) {
         let f = file_iter2.find(|h| h.as_ref().unwrap().hash == stored_hash1);
         if f.is_none() {
             warn!("hash {} not found in db2", stored_hash1);
-            count = count + 1;
+            count += 1;
         }
     }
 
     if count == 0 {
         info!("All {} entries in db1 are also in db2", entries);
     } else {
-        warn!("Missing {} entries", count);
+        warn!("Missing/Mismatch {} entries", count);
     };
 }
 

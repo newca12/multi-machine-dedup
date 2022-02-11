@@ -48,7 +48,12 @@ select * from hash where mime like "image/jpeg" ;
 
 Enable debug mode in PowerShell
 ```
-$Env:RUST_LOG='debug';  cargo run ...
+$Env:LOG='debug';  cargo run ...
+```
+
+Remove LOG environement variable in PorwerShell
+```
+remove-item Env:LOG
 ```
 
 Show help of a \<SUBCOMMAND>
