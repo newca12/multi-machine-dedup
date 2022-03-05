@@ -66,11 +66,11 @@ pub fn create_db(conn: &Connection) {
     //id              INTEGER PRIMARY KEY AUTOINCREMENT,
     conn.execute(
         "CREATE TABLE IF NOT EXISTS file (
-                  host TEXT,
+                  label TEXT,
                   full_path TEXT,
                   hash              INTEGER,
                   size INTEGER,              
-                  PRIMARY KEY (host, full_path)
+                  PRIMARY KEY (label, full_path)
                   FOREIGN KEY(hash,size) REFERENCES hash(hash,size)
                   )",
         [],
@@ -132,7 +132,7 @@ pub fn index(opt: IndexOptions) {
                 },
             }
             let res = conn.execute(
-                "INSERT INTO file (host, full_path, hash, size) VALUES (?1, ?2, ?3, ?4)",
+                "INSERT INTO file (label, full_path, hash, size) VALUES (?1, ?2, ?3, ?4)",
                 params![opt.label, data.full_path, data.hash, data.size],
             ); //.expect("req2");
             match res {
@@ -152,9 +152,9 @@ pub fn index(opt: IndexOptions) {
 
 pub fn check_integrity(opt: CheckIntegrityOptions) {
     let conn = Connection::open(opt.db).unwrap();
-    let mut stmt = conn.prepare("SELECT * FROM file WHERE host=:host").unwrap();
+    let mut stmt = conn.prepare("SELECT * FROM file WHERE label=:label").unwrap();
     let file_iter = stmt
-        .query_map(&[(":host", &opt.label)], |row| {
+        .query_map(&[(":label", &opt.label)], |row| {
             Ok(Entry {
                 hash: row.get(2)?,
                 full_path: row.get(1)?,
