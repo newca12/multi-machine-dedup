@@ -152,7 +152,9 @@ pub fn index(opt: IndexOptions) {
 
 pub fn check_integrity(opt: CheckIntegrityOptions) {
     let conn = Connection::open(opt.db).unwrap();
-    let mut stmt = conn.prepare("SELECT * FROM file WHERE label=:label").unwrap();
+    let mut stmt = conn
+        .prepare("SELECT * FROM file WHERE label=:label")
+        .unwrap();
     let file_iter = stmt
         .query_map(&[(":label", &opt.label)], |row| {
             Ok(Entry {
@@ -216,7 +218,11 @@ pub fn compare(opt: CompareOptions) {
         let stored_hash1: u32 = file1.as_ref().unwrap().hash;
         let f = file_iter2.find(|h| h.as_ref().unwrap().hash == stored_hash1);
         if f.is_none() {
-            warn!("hash {} not found in db2", stored_hash1);
+            warn!(
+                "hash {} not found in db2, location is {:?}",
+                stored_hash1,
+                find_files_from_hash(stored_hash1, &conn1)
+            );
             count += 1;
         }
     }
@@ -226,6 +232,25 @@ pub fn compare(opt: CompareOptions) {
     } else {
         warn!("Missing/Mismatch {} entries", count);
     };
+}
+
+fn find_files_from_hash(hash: u32, conn: &Connection) -> Vec<String> {
+    let mut stmt = conn.prepare("SELECT * FROM file WHERE hash=:hash").unwrap();
+    let file_iter = stmt
+        .query_map(&[(":hash", &hash)], |row| {
+            Ok(Entry {
+                hash: row.get(2)?,
+                full_path: row.get(1)?,
+                size: row.get(3)?,
+                mime: "".to_string(),
+            })
+        })
+        .unwrap();
+    let mut files = Vec::new();
+    for file in file_iter {
+        files.push(file.unwrap().full_path.clone());
+    }
+    files
 }
 
 fn get_file_content(path: &Path) -> Vec<u8> {
