@@ -31,7 +31,9 @@ You can use a convenient database tool like [DBeaver CE](https://dbeaver.io) or 
 
 Find top duplicates files larger than <A_SIZE>
 ```
-select *, count(*) as nb_dup from file where size > <A_SIZE> group by hash order by nb_dup DESC, size DESC ;
+select label, full_path, hash,size,nb_dup from file , (select hash, count(*) as nb_dup from file where size > <A_SIZE>
+group by hash order by nb_dup DESC, size DESC) as T
+where file.hash = T.hash  order by nb_dup DESC, size DESC ;
 ```
 
 Find all files with the same <CRC_VALUE>
