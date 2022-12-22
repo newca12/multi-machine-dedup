@@ -1,7 +1,14 @@
 [package]
 name = "multi-machine-dedup"
 version = "0.1.0"
+authors = ["Olivier ROLAND <newca12@users.noreply.github.com>"]
+description = "Deduplication tool using SQLite to allow multi-machine features."
+homepage = "https://github.com/newca12/multi-machine-dedup"
+repository = "https://github.com/newca12/multi-machine-dedup"
+keywords = ["dedup", "cli","program"]
+categories = ["command-line-utilities"]
 edition = "2021"
+license = "GPL-3.0-or-later"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
