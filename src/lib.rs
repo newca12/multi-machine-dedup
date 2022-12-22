@@ -8,47 +8,47 @@ use std::path::{Path, PathBuf};
 use walkdir::WalkDir;
 
 #[derive(Parser, Debug)]
-#[clap(name = "multi-machine-dedup")]
+#[command(name = "multi-machine-dedup")]
 pub struct CLI {
-    #[clap(subcommand)]
-    pub cmd: SubCommand,
+    #[command(subcommand)]
+    pub cmd: Commands,
 }
 
 #[derive(Parser, Debug)]
-pub enum SubCommand {
-    #[structopt(name = "index", about = "Use index to create or update a database")]
+pub enum Commands {
+    #[command(name = "index", about = "Use index to create or update a database")]
     Index(IndexOptions),
-    #[structopt(
+    #[command(
         name = "check-integrity",
         about = "Use check-integrity to verify all files"
     )]
     CheckIntegrity(CheckIntegrityOptions),
-    #[structopt(name = "compare", about = "Use compare to compare two databases")]
+    #[command(name = "compare", about = "Use compare to compare two databases")]
     Compare(CompareOptions),
 }
 
 #[derive(Parser, Debug)]
 pub struct IndexOptions {
-    #[structopt(short, long)]
+    #[arg(short, long)]
     pub label: String,
-    #[structopt(short, long, parse(from_os_str))]
+    #[arg(short, long)]
     pub db: PathBuf,
     pub path: PathBuf,
 }
 
 #[derive(Parser, Debug)]
 pub struct CheckIntegrityOptions {
-    #[clap(short, long)]
+    #[arg(short, long)]
     pub label: String,
-    #[clap(short, long, parse(from_os_str))]
+    #[arg(short, long)]
     pub db: PathBuf,
 }
 
 #[derive(Parser, Debug)]
 pub struct CompareOptions {
-    #[clap(long, parse(from_os_str))]
+    #[arg(long)]
     pub db1: PathBuf,
-    #[clap(long, parse(from_os_str))]
+    #[arg(long)]
     pub db2: PathBuf,
 }
 
@@ -201,6 +201,20 @@ pub fn compare(opt: CompareOptions) {
             })
         })
         .unwrap();
+    /* TODO add optionnal filters to command line like --exclude
+        .filter(
+            (|x| {
+                //println!("XX {:?} {}", Path::new(&find_files_from_hash(x.as_ref().unwrap().hash, &conn1)[0]).file_name(), !Path::new(&find_files_from_hash(x.as_ref().unwrap().hash, &conn1)[0]).ends_with("jpg\""));
+                x.as_ref().unwrap().size != 4096
+                    && Path::new(&find_files_from_hash(x.as_ref().unwrap().hash, &conn1)[0])
+                        .file_name()
+                        .unwrap()
+                        != ".DS_Store"
+            }),
+        );
+            println!("XX {:?}",find_files_from_hash(x.as_ref().unwrap().hash, &conn1)[0]);
+            !Path::new(&find_files_from_hash(x.as_ref().unwrap().hash, &conn1)[0]).ends_with("/.DS_Store") }));
+    */
     let mut count = 0;
     let mut entries = 0;
     for file1 in file_iter1 {

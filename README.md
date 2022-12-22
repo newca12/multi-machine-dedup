@@ -8,21 +8,27 @@ multi-machine-dedup is an EDLA project.
 
 The purpose of [edla.org](http://www.edla.org) is to promote the state of the art in various domains.
 
+### Installation ###
+
+```
+cargo install multi-machine-dedup
+```
+
 ## How to use it ##
 
 Index recursively a directory <DIRECTORY_FULL_PATH> labelled with a \<LABEL> in a SQLite database <SQLITE_FILE>
 ```
- cargo run -- index -l <LABEL> --db <SQLITE_FILE> <DIRECTORY_FULL_PATH>
+ multi-machine-dedup index -l <LABEL> --db <SQLITE_FILE> <DIRECTORY_FULL_PATH>
 ```
 
 Check a directory
 ```
- cargo run -- check-integrity -l <LABEL> --db <SQLITE_FILE>
+ multi-machine-dedup check-integrity -l <LABEL> --db <SQLITE_FILE>
 ```
 
 Compare two databases
 ```
- cargo run -- compare --db1 <SQLITE_FILE_1> --db2 <SQLITE_FILE_2>
+ multi-machine-dedup compare --db1 <SQLITE_FILE_1> --db2 <SQLITE_FILE_2>
 ```
 
 ## Example of SQL queries ##
@@ -48,19 +54,23 @@ select * from hash where mime like "image/jpeg" ;
 
 ## Tips ##
 
-Enable debug mode in PowerShell
+* Enable debug mode in PowerShell
 ```
 $Env:LOG='debug';  cargo run ...
 ```
 
-Remove LOG environement variable in PorwerShell
+* Remove LOG environement variable in PorwerShell
 ```
 remove-item Env:LOG
 ```
 
-Show help of a \<SUBCOMMAND>
+* Show help for a \<SUBCOMMAND>
 ```
-cargo run -- <SUBCOMMAND> --help
+multi-machine-dedup <SUBCOMMAND> --help
+```
+or
+```
+multi-machine-dedup help <SUBCOMMAND>
 ```
 
 ## Roadmap ##
