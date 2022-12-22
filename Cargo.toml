@@ -1,6 +1,6 @@
 [package]
 name = "multi-machine-dedup"
-version = "0.1.0"
+version = "0.2.0"
 authors = ["Olivier ROLAND <newca12@users.noreply.github.com>"]
 description = "Deduplication tool using SQLite to allow multi-machine features."
 homepage = "https://github.com/newca12/multi-machine-dedup"
